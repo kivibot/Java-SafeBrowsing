@@ -1,4 +1,4 @@
 Java-SafeBrowsing
 =================
 
-A simple wrapper for Google's safe browsing API
+A simple java wrapper for Google's safe browsing API v3.1
