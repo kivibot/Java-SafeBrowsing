@@ -1,7 +1,7 @@
-package fi.kivibot.safebrowsing.cache;
+package fi.kivibot.sb.lookup.cache;
 
-import fi.kivibot.safebrowsing.LookupResult;
-import fi.kivibot.safebrowsing.LookupTask;
+import fi.kivibot.sb.lookup.LookupResult;
+import fi.kivibot.sb.lookup.LookupTask;
 import java.io.IOException;
 
 /**

@@ -1,4 +1,4 @@
-package fi.kivibot.safebrowsing;
+package fi.kivibot.sb.lookup;
 
 import java.util.Objects;
 

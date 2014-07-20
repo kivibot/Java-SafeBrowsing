@@ -1,8 +1,8 @@
-package fi.kivibot.safebrowsing.cache.impl;
+package fi.kivibot.sb.lookup.cache.impl;
 
-import fi.kivibot.safebrowsing.cache.LookupCache;
-import fi.kivibot.safebrowsing.LookupResult;
-import fi.kivibot.safebrowsing.LookupTask;
+import fi.kivibot.sb.lookup.cache.LookupCache;
+import fi.kivibot.sb.lookup.LookupResult;
+import fi.kivibot.sb.lookup.LookupTask;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

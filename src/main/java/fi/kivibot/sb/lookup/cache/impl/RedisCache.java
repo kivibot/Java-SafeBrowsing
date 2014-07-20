@@ -1,8 +1,8 @@
-package fi.kivibot.safebrowsing.cache.impl;
+package fi.kivibot.sb.lookup.cache.impl;
 
-import fi.kivibot.safebrowsing.LookupResult;
-import fi.kivibot.safebrowsing.LookupTask;
-import fi.kivibot.safebrowsing.cache.LookupCache;
+import fi.kivibot.sb.lookup.LookupResult;
+import fi.kivibot.sb.lookup.LookupTask;
+import fi.kivibot.sb.lookup.cache.LookupCache;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,7 +50,7 @@ public class RedisCache implements LookupCache {
         LookupResult rs;
         byte[] bytes;
         try {
-            bytes = j.get(url.getBytes());
+            bytes = j.get(("jsb:" + url).getBytes());
         } catch (JedisConnectionException e) {
             pool.returnBrokenResource(j);
             throw e;
@@ -67,7 +67,7 @@ public class RedisCache implements LookupCache {
             lrm.trusted = rs.isTrusted();
 
             try {
-                j.setex(url.getBytes(), (int) ttl_seconds, mp.write(lrm));
+                j.setex(("jsb:" + url).getBytes(), (int) ttl_seconds, mp.write(lrm));
             } catch (JedisConnectionException e) {
                 pool.returnBrokenResource(j);
                 throw e;

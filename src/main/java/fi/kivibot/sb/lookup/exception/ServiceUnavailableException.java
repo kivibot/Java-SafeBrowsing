@@ -1,4 +1,4 @@
-package fi.kivibot.safebrowsing;
+package fi.kivibot.sb.lookup.exception;
 
 /**
  * Thrown to indicate that the underlying service is not available.

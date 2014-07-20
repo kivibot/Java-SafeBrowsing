@@ -1,6 +1,6 @@
-package fi.kivibot.safebrowsing;
+package fi.kivibot.sb.lookup;
 
-import fi.kivibot.safebrowsing.cache.LookupCache;
+import fi.kivibot.sb.lookup.exception.ServiceUnavailableException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -13,7 +13,7 @@ import org.apache.commons.io.IOUtils;
  *
  * @author Nicklas Ahlskog
  */
-public class SafeBrowsingLookup {
+public class SafeBrowsingLookup implements LookupTask {
 
     private static final String DEFAULT_API_URL_FORMAT = "https://sb-ssl.google.com/safebrowsing/api/lookup?client=%s&apikey=%s&appver=%s&pver=3.1&url=";
 
@@ -21,9 +21,6 @@ public class SafeBrowsingLookup {
     private final String apiKey;
     private final String appver;
     private final String urlFormat;
-    private boolean cached = false;
-    private long ttlSeconds;
-    private LookupCache cache;
 
     /**
      *
@@ -31,10 +28,6 @@ public class SafeBrowsingLookup {
      */
     public SafeBrowsingLookup(String apiKey) {
         this("api", apiKey, "1.0");
-    }
-
-    public SafeBrowsingLookup(String apiKey, LookupCache cache, long ttlSeconds) {
-        this("api", apiKey, "1.0", cache, ttlSeconds);
     }
 
     /**
@@ -56,13 +49,6 @@ public class SafeBrowsingLookup {
             //The system is supposed to support UTF-8
             throw new AssertionError(ex);
         }
-    }
-
-    public SafeBrowsingLookup(String client, String apiKey, String appver, LookupCache cache, long ttlSeconds) {
-        this(client, apiKey, appver);
-        this.cached = true;
-        this.cache = cache;
-        this.ttlSeconds = ttlSeconds;
     }
 
     /**
@@ -89,46 +75,38 @@ public class SafeBrowsingLookup {
      * @throws RuntimeException if the client receives any other error code or
      * the return code is unknown.
      */
+    @Override
     public LookupResult lookupURL(String url_in) throws IOException {
-        LookupTask lt = new LookupTask() {
-            @Override
-            public LookupResult lookupURL(String url_in) throws IOException {
-                String encoded_url = URLEncoder.encode(url_in, "utf-8");
-                URL url = new URL(urlFormat + encoded_url);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-                conn.setUseCaches(false);
-                conn.connect();
-                int code = conn.getResponseCode();
-                boolean trusted;
-                String data = null;
-                switch (code) {
-                    case 200:
-                        trusted = false;
-                        break;
-                    case 204:
-                        trusted = true;
-                        break;
-                    case 400:
-                        throw new RuntimeException("Error 400: Bad Request");
-                    case 401:
-                        throw new RuntimeException("Error 401: Not Authorized");
-                    case 503:
-                        throw new ServiceUnavailableException("Error 503: Service Unavailable");
-                    default:
-                        throw new RuntimeException("Unknown response code: " + code);
-                }
-                if (conn.getContentLength() > 0) {
-                    data = IOUtils.toString(conn.getInputStream());
-                }
-                conn.disconnect();
-                return new LookupResult(encoded_url, code, data, trusted);
-            }
-        };
-        if (this.cached) {
-            return cache.getCached(url_in, this.ttlSeconds, lt);
+        String encoded_url = URLEncoder.encode(url_in, "utf-8");
+        URL url = new URL(urlFormat + encoded_url);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setUseCaches(false);
+        conn.connect();
+        int code = conn.getResponseCode();
+        boolean trusted;
+        String data = null;
+        switch (code) {
+            case 200:
+                trusted = false;
+                break;
+            case 204:
+                trusted = true;
+                break;
+            case 400:
+                throw new RuntimeException("Error 400: Bad Request");
+            case 401:
+                throw new RuntimeException("Error 401: Not Authorized");
+            case 503:
+                throw new ServiceUnavailableException("Error 503: Service Unavailable");
+            default:
+                throw new RuntimeException("Unknown response code: " + code);
         }
-        return lt.lookupURL(url_in);
+        if (conn.getContentLength() > 0) {
+            data = IOUtils.toString(conn.getInputStream());
+        }
+        conn.disconnect();
+        return new LookupResult(url_in, code, data, trusted);
     }
 
 }
