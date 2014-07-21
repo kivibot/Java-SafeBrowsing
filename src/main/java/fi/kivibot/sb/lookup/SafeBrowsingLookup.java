@@ -1,5 +1,6 @@
 package fi.kivibot.sb.lookup;
 
+import fi.kivibot.sb.lookup.exception.LookupException;
 import fi.kivibot.sb.lookup.exception.ServiceUnavailableException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -32,9 +33,9 @@ public class SafeBrowsingLookup implements LookupTask {
 
     /**
      *
-     * @param client
-     * @param apiKey
-     * @param appver
+     * @param client the type of client
+     * @param apiKey the API key for this application
+     * @param appver indicates the version of this application
      */
     public SafeBrowsingLookup(String client, String apiKey, String appver) {
         this.client = client;
@@ -58,10 +59,10 @@ public class SafeBrowsingLookup implements LookupTask {
      * @return true if the URL is trusted; otherwise false.
      * @throws IOException if any general IO problems occur.
      * @throws ServiceUnavailableException if the service in unavailable
-     * @throws RuntimeException if the client receives any other error code or
+     * @throws LookupException if the client receives any other error code or
      * the return code is unknown.
      */
-    public boolean isTrusted(String url_in) throws IOException {
+    public boolean isTrusted(String url_in) throws IOException, ServiceUnavailableException, LookupException {
         return lookupURL(url_in).isTrusted();
     }
 
@@ -72,11 +73,11 @@ public class SafeBrowsingLookup implements LookupTask {
      * @return new LookupResult containing the results
      * @throws IOException if any general IO problems occur.
      * @throws ServiceUnavailableException if the service in unavailable
-     * @throws RuntimeException if the client receives any other error code or
+     * @throws LookupException if the client receives any other error code or
      * the return code is unknown.
      */
     @Override
-    public LookupResult lookupURL(String url_in) throws IOException {
+    public LookupResult lookupURL(String url_in) throws IOException, ServiceUnavailableException, LookupException {
         String encoded_url = URLEncoder.encode(url_in, "utf-8");
         URL url = new URL(urlFormat + encoded_url);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -94,13 +95,13 @@ public class SafeBrowsingLookup implements LookupTask {
                 trusted = true;
                 break;
             case 400:
-                throw new RuntimeException("Error 400: Bad Request");
+                throw new LookupException("Error 400: Bad Request");
             case 401:
-                throw new RuntimeException("Error 401: Not Authorized");
+                throw new LookupException("Error 401: Not Authorized");
             case 503:
                 throw new ServiceUnavailableException("Error 503: Service Unavailable");
             default:
-                throw new RuntimeException("Unknown response code: " + code);
+                throw new LookupException("Unknown response code: " + code);
         }
         if (conn.getContentLength() > 0) {
             data = IOUtils.toString(conn.getInputStream());

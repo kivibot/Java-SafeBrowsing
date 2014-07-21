@@ -3,6 +3,8 @@ package fi.kivibot.sb.lookup.cache.impl;
 import fi.kivibot.sb.lookup.LookupResult;
 import fi.kivibot.sb.lookup.LookupTask;
 import fi.kivibot.sb.lookup.cache.LookupCache;
+import fi.kivibot.sb.lookup.exception.LookupException;
+import fi.kivibot.sb.lookup.exception.ServiceUnavailableException;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,6 +21,8 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
  */
 public class RedisCache implements LookupCache {
 
+    public static final int DEFAULT_PORT = 6379;
+    
     @Message
     static class LookupResultMessage {
 
@@ -45,7 +49,7 @@ public class RedisCache implements LookupCache {
     }
 
     @Override
-    public LookupResult getCached(String url, long ttl_seconds, LookupTask task) throws IOException {
+    public LookupResult getCached(String url, long ttl_seconds, LookupTask task) throws IOException, ServiceUnavailableException, LookupException {
         Jedis j = pool.getResource();
         LookupResult rs;
         byte[] bytes;

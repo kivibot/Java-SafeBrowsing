@@ -1,7 +1,12 @@
 package fi.kivibot.sb.lookup;
 
 import fi.kivibot.sb.lookup.cache.LookupCache;
+import fi.kivibot.sb.lookup.exception.CacheException;
+import fi.kivibot.sb.lookup.exception.LookupException;
+import fi.kivibot.sb.lookup.exception.ServiceUnavailableException;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -24,9 +29,22 @@ public class CachedLookup extends SafeBrowsingLookup {
         this.ttlSeconds = ttlSeconds;
     }
 
+   /**
+    * 
+    * @param url_in
+    * @return null if a Caching error occurred; otherwise the new LookupResult
+    * @throws IOException
+    * @throws ServiceUnavailableException
+    * @throws LookupException 
+    */
     @Override
-    public LookupResult lookupURL(String url_in) throws IOException {
-        return cache.getCached(url_in, ttlSeconds, super::lookupURL);
+    public LookupResult lookupURL(String url_in) throws IOException, ServiceUnavailableException, LookupException {
+        try {
+            return cache.getCached(url_in, ttlSeconds, super::lookupURL);
+        } catch (CacheException ex) {
+            Logger.getLogger(CachedLookup.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 
 }

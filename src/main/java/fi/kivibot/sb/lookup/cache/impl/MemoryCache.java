@@ -3,6 +3,8 @@ package fi.kivibot.sb.lookup.cache.impl;
 import fi.kivibot.sb.lookup.cache.LookupCache;
 import fi.kivibot.sb.lookup.LookupResult;
 import fi.kivibot.sb.lookup.LookupTask;
+import fi.kivibot.sb.lookup.exception.LookupException;
+import fi.kivibot.sb.lookup.exception.ServiceUnavailableException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,7 +49,7 @@ public class MemoryCache extends Thread implements LookupCache {
     }
 
     @Override
-    public LookupResult getCached(String url, long ttl_seconds, LookupTask task) throws IOException {
+    public LookupResult getCached(String url, long ttl_seconds, LookupTask task) throws IOException, ServiceUnavailableException, LookupException {
         Pair lt = map.get(url);
         if (lt == null || System.currentTimeMillis() - lt.getTime() >= ttl_seconds * 1000) {
             lt = new Pair(task.lookupURL(url), System.currentTimeMillis());
