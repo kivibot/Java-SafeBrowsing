@@ -16,7 +16,7 @@ import org.apache.commons.io.IOUtils;
  */
 public class SafeBrowsingLookup implements LookupTask {
 
-    private static final String DEFAULT_API_URL_FORMAT = "https://sb-ssl.google.com/safebrowsing/api/lookup?client=%s&apikey=%s&appver=%s&pver=3.1&url=";
+    private static final String DEFAULT_API_URL_FORMAT = "https://sb-ssl.google.com/safebrowsing/api/lookup?client=%s&key=%s&appver=%s&pver=3.1&url=";
 
     private final String client;
     private final String apiKey;

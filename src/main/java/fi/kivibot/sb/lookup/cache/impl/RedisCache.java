@@ -6,8 +6,6 @@ import fi.kivibot.sb.lookup.cache.LookupCache;
 import fi.kivibot.sb.lookup.exception.LookupException;
 import fi.kivibot.sb.lookup.exception.ServiceUnavailableException;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.msgpack.MessagePack;
 import org.msgpack.annotation.Message;
 import redis.clients.jedis.Jedis;
